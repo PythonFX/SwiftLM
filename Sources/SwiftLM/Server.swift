@@ -331,17 +331,20 @@ struct MLXServer: AsyncParsableCommand {
             modelConfig = ModelConfiguration(id: modelId)
         }
         
-        // ── Pre-load profiling ──
-        // Resolve model directory for profiling (checks HuggingFace cache)
+        // ── Pre-load profiling (only when needed) ──
+        // modelDirectory is used for SSD streaming setup (line ~402) and partition
+        // planning (line ~474), so it must be declared at this scope.
+        // ModelProfiler.profile() does a filesystem walk; only run it when
+        // --stream-experts is active to avoid startup overhead on normal launches.
         let modelDirectory = resolveModelDirectory(modelId: modelId)
         var mainModelProfile: ModelProfile? = nil
-        if let dir = modelDirectory {
+        if self.streamExperts, let dir = modelDirectory {
             mainModelProfile = ModelProfiler.profile(modelDirectory: dir, modelId: modelId)
-            
+
             // Fix #72 follow-up: If the user passed --stream-experts but the model
             // is not an MoE, disable the flag early to prevent incorrect memory limits
             // and erroneous auto-capping of draft tokens.
-            if self.streamExperts, let profile = mainModelProfile, !profile.isMoE {
+            if let profile = mainModelProfile, !profile.isMoE {
                 print("[SwiftLM] ⚠️  Model does not support SSD expert streaming (\(profile.modelType) is not MoE). Ignoring --stream-experts flag.")
                 self.streamExperts = false
             }
@@ -1591,6 +1594,7 @@ func handleChatCompletion(
             // Speculative decoding path: draft model generates candidates, main model verifies.
             // Bypass prompt cache to avoid draft/main KV drift on partial-match restores.
             print("[SwiftLM] Using speculative decoding (\(numDraftTokens) draft tokens/round)")
+            print("[SwiftLM] Draft model type: \(type(of: draftRef.model))")
             stream = try MLXLMCommon.generate(
                 input: lmInput, cache: cache, parameters: params, context: context,
                 draftModel: draftRef.model, numDraftTokens: numDraftTokens

@@ -484,13 +484,15 @@ def print_visualization(results, model_name, baseline_alloc):
         ctx_label = f"{ctx:,} tokens"
         print(f"\n  {C.BOLD}{C.WHITE}{ctx_label}{C.RESET}")
         for r in ctx_results:
-            ttft_val = float(r["ttft"]) if r["ttft"] != "N/A" else 0.0
+            ttft_val = float(r["ttft"]) if r["ttft"] != "N/A" else None
             color = CONFIG_COLORS.get(r["config"], "")
             label = f"    {r['config']:<20}"
-            b = bar(ttft_val, max_ttft, width=28, color=color)
-            val_str = f"{C.BOLD}{ttft_val:>7.2f}{C.RESET}s"
-            best_in_ctx = min(float(x["ttft"]) for x in ctx_results)
-            crown = f" {C.YELLOW}★{C.RESET}" if ttft_val == best_in_ctx and len(ctx_results) > 1 else ""
+            display_val = ttft_val if ttft_val is not None else 0.0
+            b = bar(display_val, max_ttft, width=28, color=color)
+            val_str = f"{C.BOLD}{display_val:>7.2f}{C.RESET}s" if ttft_val is not None else f"{C.BOLD}{'N/A':>8}{C.RESET}"
+            numeric_ttfts = [float(x["ttft"]) for x in ctx_results if x["ttft"] != "N/A"]
+            best_in_ctx = min(numeric_ttfts) if numeric_ttfts else None
+            crown = f" {C.YELLOW}★{C.RESET}" if (ttft_val is not None and best_in_ctx is not None and ttft_val == best_in_ctx and len(ctx_results) > 1) else ""
             print(f"{label} {b} {val_str}{crown}")
 
     # ── 3) GPU Memory Allocated (virtual, includes SSD) ──
