@@ -6,6 +6,8 @@
 xcuserdata/
 DerivedData/
 
+.omc/
+
 # macOS
 .DS_Store
 *.dSYM/
