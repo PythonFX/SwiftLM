@@ -9,6 +9,11 @@ let package = Package(
         .executable(name: "Step02_Tokenizer", targets: ["Step02_Tokenizer"]),
         .executable(name: "Step03_LoadWeights", targets: ["Step03_LoadWeights"]),
         .executable(name: "Step04_Embedding", targets: ["Step04_Embedding"]),
+        .executable(name: "Step05_Attention", targets: ["Step05_Attention"]),
+        .executable(name: "Step06_Transformer", targets: ["Step06_Transformer"]),
+        .executable(name: "Step07_Sampling", targets: ["Step07_Sampling"]),
+        .executable(name: "Step08_KVCache", targets: ["Step08_KVCache"]),
+        .executable(name: "Step09_Generate", targets: ["Step09_Generate"]),
     ],
     dependencies: [
         // 官方Apple MLX Swift — 学习阶段用官方版即可
@@ -52,6 +57,52 @@ let package = Package(
                 .product(name: "Tokenizers", package: "swift-transformers"),
             ],
             path: "Sources/Step04_Embedding"
+        ),
+        // ── Step 5: Attention — Q/K/V, 多头注意力, RoPE ──
+        .executableTarget(
+            name: "Step05_Attention",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+                .product(name: "Hub", package: "swift-transformers"),
+                .product(name: "Tokenizers", package: "swift-transformers"),
+            ],
+            path: "Sources/Step05_Attention"
+        ),
+        // ── Step 6: Transformer Block — 完整的一层 ──
+        .executableTarget(
+            name: "Step06_Transformer",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+                .product(name: "Hub", package: "swift-transformers"),
+                .product(name: "Tokenizers", package: "swift-transformers"),
+            ],
+            path: "Sources/Step06_Transformer"
+        ),
+        // ── Step 7: Sampling — Temperature, Top-k, Top-p ──
+        .executableTarget(
+            name: "Step07_Sampling",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+            ],
+            path: "Sources/Step07_Sampling"
+        ),
+        // ── Step 8: KV Cache — 避免重复计算 ──
+        .executableTarget(
+            name: "Step08_KVCache",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+            ],
+            path: "Sources/Step08_KVCache"
+        ),
+        // ── Step 9: Generate — 端到端文本生成 ──
+        .executableTarget(
+            name: "Step09_Generate",
+            dependencies: [
+                .product(name: "MLX", package: "mlx-swift"),
+                .product(name: "Hub", package: "swift-transformers"),
+                .product(name: "Tokenizers", package: "swift-transformers"),
+            ],
+            path: "Sources/Step09_Generate"
         ),
     ]
 )
